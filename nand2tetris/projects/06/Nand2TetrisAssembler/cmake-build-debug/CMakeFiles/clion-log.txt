@@ -1,0 +1,4 @@
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER=/usr/local/Cellar/gcc/8.3.0/bin/gcc-8 -DCMAKE_CXX_COMPILER=/usr/local/Cellar/gcc/8.3.0/bin/g++-8 -DCMAKE_BUILD_TYPE=DEBUG -G "CodeBlocks - Unix Makefiles" /Users/brycecallender/CLionProjects/Nand2TetrisAssembler
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /Users/brycecallender/CLionProjects/Nand2TetrisAssembler/cmake-build-debug
