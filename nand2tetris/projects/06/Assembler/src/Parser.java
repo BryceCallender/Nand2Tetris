@@ -52,7 +52,6 @@ public class Parser
         fileName = new String(c);
 
         File file = new File(path);
-
         for (String name : file.list())
         {
             if(name.contains(fileName))
