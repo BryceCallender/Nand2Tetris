@@ -13,9 +13,9 @@ public class Parser
     private ArrayList<String> codeLines;
     private BufferedReader inputFileStream;
     private PrintWriter outputFileStream;
-    private final String path = "/Users/brycecallender/Desktop/nand2tetris/projects/06/";
+    private final String path = "/Users/brycecallender/Desktop/Nand2tetris/nand2tetris/projects/06/";
     private String currentDirectory;
-    
+
     Parser(String fileName)
     {
         symbolTable = new HashMap<>();
@@ -52,6 +52,7 @@ public class Parser
         fileName = new String(c);
 
         File file = new File(path);
+
         for (String name : file.list())
         {
             if(name.contains(fileName))
@@ -105,7 +106,7 @@ public class Parser
         String line;
         while((line = inputFileStream.readLine()) != null)
         {
-            //line.erase(remove_if(line.begin(), line.end(), isspace), line.end()); //get rid of whitespace
+            line = line.replaceAll("\\s+", ""); //get rid of whitespace
             if(line.length() >= 2) //check to have at least 2 characters to do these operations
             {
                 if(line.charAt(0) == '(' && line.charAt(line.length()-1) == ')') //pseudo-command
@@ -114,13 +115,13 @@ public class Parser
                     //it'll have the rom address of size (vector size will be 1 when something added and
                     //we want to start at 0 so essentially when you load the label into rom just take the
                     //current size of the codeLines vector)
-                    symbolTable.put(line.substring(1,line.length() - 2),codeLines.size());
+                    symbolTable.put(line.substring(1,line.length() - 1),codeLines.size());
                 }
                 else if(line.charAt(0) != '/' && line.charAt(1) != '/') //only come in if its not a comment
                 {
                     if(line.contains("//"))
                     {
-                        line = line.replace("//",""); //get rid of the comment at end of line
+                        line = line.substring(0,line.indexOf("//")); //get rid of the comment at end of line
                         codeLines.add(line); //put the code line into the vector
                     }
                     else
@@ -172,7 +173,7 @@ public class Parser
         {
             number = Integer.valueOf(line.substring(1)); // after @
         }
-
+        
         binary += padStringWithZeros(Integer.toBinaryString(number),15);
 
         return binary;

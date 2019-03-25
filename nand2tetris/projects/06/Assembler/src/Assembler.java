@@ -1,6 +1,6 @@
 public class Assembler
 {
-    static int variablePlacement;
+    static int variablePlacement = 16;
     private Parser parser;
 
     Assembler(String fileName) // filename will have it in the name NAME.asm
