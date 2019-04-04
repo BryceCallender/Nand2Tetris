@@ -21,7 +21,8 @@ public class VirtualMachine
     private ArrayList<Parser> parsers;
     private ArrayList<String> parserPaths;
     static CodeWriter codeWriter;
-    static String path = "/Users/brycecallender/desktop/Nand2Tetris/nand2tetris/projects/08";
+    static String path = "C:\\Users\\bryce\\Desktop\\Nand2Tetris\\nand2tetris\\projects\\08";
+    //static String path = "/Users/brycecallender/desktop/Nand2Tetris/nand2tetris/projects/08";
     boolean wroteInit = false;
 
     VirtualMachine(String fileName)

@@ -169,8 +169,7 @@ public class CodeWriter
     public void writeInit()
     {
         pushResultToRegister("SP", 256);
-        pushResultToRegister("LCL",300);
-        pushResultToRegister("ARG",400);
+        writeCall("Sys.init",0);
     }
 
     public void writeLabel(String label)
@@ -194,10 +193,11 @@ public class CodeWriter
         outputFileStream.println("D;JGT");
     }
 
-    public void writeCall(String call, int numArgs)
+    public void writeCall(String functionName, int numArgs)
     {
         //1)push all the arguments to the stack
         //2)Call the function
+        writeGoto(functionName);
     }
 
     public void writeReturn()
@@ -207,7 +207,13 @@ public class CodeWriter
 
     public void writeFunction(String functionName, int numLocals)
     {
-
+        outputFileStream.println("(" + functionName + ")");
+        for(int i = 0; i < numLocals; i++)
+        {
+            //Initialize all of the local variables to 0
+            pushResultToRegister("SP",0);
+            pushToStack();
+        }
     }
 
     void pushToStack()
