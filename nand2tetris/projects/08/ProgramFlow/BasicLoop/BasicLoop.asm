@@ -1,9 +1,11 @@
+//push constant 0
 @0
 D=A
 @SP
 AM=M+1
 A=A-1
 M=D
+//pop local 0
 @LCL
 D=M
 @0
@@ -23,7 +25,9 @@ AM=M+1
 A=A-1
 @SP
 AM=M-1
+//label LOOP_START
 (LOOP_START)
+//push argument 0
 @ARG
 D=M
 @0
@@ -38,6 +42,7 @@ D=M
 AM=M+1
 A=A-1
 M=D
+//push local 0
 @LCL
 D=M
 @0
@@ -52,6 +57,7 @@ D=M
 AM=M+1
 A=A-1
 M=D
+//add
 @SP
 AM=M-1
 D=M
@@ -62,6 +68,7 @@ M=D
 @SP
 AM=M+1
 A=A-1
+//pop local 0
 @LCL
 D=M
 @0
@@ -81,6 +88,7 @@ AM=M+1
 A=A-1
 @SP
 AM=M-1
+//push argument 0
 @ARG
 D=M
 @0
@@ -95,12 +103,14 @@ D=M
 AM=M+1
 A=A-1
 M=D
+//push constant 1
 @1
 D=A
 @SP
 AM=M+1
 A=A-1
 M=D
+//sub
 @SP
 AM=M-1
 D=M
@@ -111,6 +121,7 @@ M=D
 @SP
 AM=M+1
 A=A-1
+//pop argument 0
 @ARG
 D=M
 @0
@@ -130,6 +141,7 @@ AM=M+1
 A=A-1
 @SP
 AM=M-1
+//push argument 0
 @ARG
 D=M
 @0
@@ -149,6 +161,7 @@ AM=M-1
 D=M
 @LOOP_START
 D;JGT
+//push local 0
 @LCL
 D=M
 @0
