@@ -1,27 +1,39 @@
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+import java.io.*;
 
 public class CodeWriter
 {
     String fileName;
-    public PrintWriter outputFileStream;
+    PrintWriter outputFileStream;
     int equalCount = 0;
     int greaterCount = 0;
     int lessCount = 0;
+    int returnCount = 0;
+    String functionName = "";
 
     CodeWriter() {}
 
-    public void setFileName(String name) throws FileNotFoundException
+    public void setFileName(String name) throws IOException
     {
-        fileName = name.substring(name.lastIndexOf('/'),name.indexOf(".vm"));
-        name = name.substring(0,name.lastIndexOf('/'));
-        name += fileName + ".asm";
-        System.out.println(name);
-        outputFileStream = new PrintWriter(name);
+        if(name.contains(".vm"))
+        {
+            fileName = name.substring(name.lastIndexOf('/'),name.indexOf(".vm"));
+            name = name.substring(0,name.lastIndexOf('/'));
+            name += fileName + ".asm";
+            outputFileStream = new PrintWriter(name);
+        }
+        else
+        {
+            fileName = name.substring(name.lastIndexOf('/'));
+            name += fileName + ".asm";
+            outputFileStream = new PrintWriter(new FileWriter(name,true));
+            System.out.println(name);
+        }
     }
 
     public void writeArithmetic(String line)
     {
+        line = line.trim();
+        outputFileStream.println("//" + line);
         switch (line)
         {
             case "add":
@@ -89,8 +101,10 @@ public class CodeWriter
     public void writePushPop(CommandType commandType, String segment, int index)
     {
         //If its a push command
+
         if(commandType == CommandType.C_PUSH)
         {
+            outputFileStream.println("//push " + segment + " " + index);
             switch(segment)
             {
                 case "argument":
@@ -121,8 +135,7 @@ public class CodeWriter
                     getOffset();
                     break;
                 case "static":
-                    calculateAndStoreOffset("16",index,true);
-                    getOffset();
+                    staticArithmetic(true,index);
                     break;
             }
             //Write what happens to the stack
@@ -130,6 +143,7 @@ public class CodeWriter
         }
         else //its a pop command
         {
+            outputFileStream.println("//pop " + segment + " " + index);
             switch(segment)
             {
                 case "argument":
@@ -157,14 +171,12 @@ public class CodeWriter
                     getOffsetAndStore();
                     break;
                 case "static":
-                    calculateAndStoreOffset("16",index,true);
-                    getOffsetAndStore();
+                    staticArithmetic(false,index);
                     break;
             }
             popFromStack();
         }
     }
-
 
     public void writeInit()
     {
@@ -174,11 +186,13 @@ public class CodeWriter
 
     public void writeLabel(String label)
     {
+        outputFileStream.println("//label " + label);
         outputFileStream.println("(" + label + ")");
     }
 
     public void writeGoto(String gotoCommand)
     {
+        outputFileStream.println("//goto " + gotoCommand);
         outputFileStream.println("@" + gotoCommand);
         outputFileStream.println("0;JMP");
     }
@@ -188,31 +202,179 @@ public class CodeWriter
         //Will jump if the value is not zero
         //so if its 1
         popFromStack();
+        outputFileStream.println("@SP");
+        outputFileStream.println("A=M");
         outputFileStream.println("D=M");
         outputFileStream.println("@" + ifCommand);
-        outputFileStream.println("D;JGT");
+        outputFileStream.println("D;JNE");
     }
 
     public void writeCall(String functionName, int numArgs)
     {
-        //1)push all the arguments to the stack
-        //2)Call the function
+        outputFileStream.println("//call " + functionName + " " + numArgs);
+        //Makes the label and things of Name$ret.Digit where digit is unique identifier
+        String returnString = functionName +  "$ret." + returnCount;
+        //Push the return address onto the stack
+        outputFileStream.println("@" + returnString);
+        outputFileStream.println("D=A");
+        pushToStack();
+
+        //Push local
+        outputFileStream.println("@LCL");
+        outputFileStream.println("D=M");
+        pushToStack();
+
+        //Push ARG
+        outputFileStream.println("@ARG");
+        outputFileStream.println("D=M");
+        pushToStack();
+
+        //Push this
+        outputFileStream.println("@THIS");
+        outputFileStream.println("D=M");
+        pushToStack();
+
+        //Push that
+        outputFileStream.println("@THAT");
+        outputFileStream.println("D=M");
+        pushToStack();
+
+        //ARG = SP - n - 5
+        //This puts SP into a temp register R13
+        outputFileStream.println("@SP");
+        outputFileStream.println("D=M");
+        outputFileStream.println("@R13");
+        outputFileStream.println("M=D");
+
+        //SP - n
+        outputFileStream.println("@" + numArgs);
+        outputFileStream.println("D=A");
+        outputFileStream.println("@R13");
+        outputFileStream.println("M=M-D");
+
+        //SP - n - 5
+        outputFileStream.println("@5");
+        outputFileStream.println("D=A");
+        outputFileStream.println("@R13");
+        outputFileStream.println("MD=M-D");
+        outputFileStream.println("@ARG");
+        outputFileStream.println("M=D");
+
+        //LCL = SP
+        outputFileStream.println("@SP");
+        outputFileStream.println("D=M");
+        outputFileStream.println("@LCL");
+        outputFileStream.println("M=D");
+
+        //Goto f
         writeGoto(functionName);
+
+        //Declare label for return address
+        writeLabel(returnString);
+        returnCount++;
     }
 
+    //FRAME is R14
+    //RET is R15
     public void writeReturn()
     {
+        outputFileStream.println("//return");
+        popFromStack();
+        //Store temp variable
+        outputFileStream.println("@SP");
+        outputFileStream.println("A=M");
+        outputFileStream.println("D=M");
+        outputFileStream.println("@R13");
+        outputFileStream.println("M=D");
+        incrementSP();
 
+        //FRAME = LCL
+        outputFileStream.println("@LCL");
+        outputFileStream.println("D=M");
+        outputFileStream.println("@R14");
+        outputFileStream.println("M=D");
+
+        //RET = *(FRAME - 5)
+        outputFileStream.println("@5");
+        outputFileStream.println("D=A");
+        outputFileStream.println("@R14");
+        outputFileStream.println("A=M-D");
+        outputFileStream.println("D=M");
+        outputFileStream.println("@R15");
+        outputFileStream.println("M=D");
+
+        //*ARG = pop()
+        popFromStack();
+        outputFileStream.println("@SP");
+        outputFileStream.println("D=M");
+        outputFileStream.println("@ARG");
+        outputFileStream.println("A=M");
+        outputFileStream.println("M=D");
+
+        //Push Result to the stack
+        outputFileStream.println("@R13");
+        outputFileStream.println("D=M");
+        outputFileStream.println("@ARG");
+        outputFileStream.println("A=M");
+        outputFileStream.println("M=D");
+
+        //SP = ARG + 1
+        outputFileStream.println("@ARG");
+        outputFileStream.println("D=M+1");
+        outputFileStream.println("@SP");
+        outputFileStream.println("M=D");
+
+        //THAT = *(FRAME - 1)
+        outputFileStream.println("@R14");
+        outputFileStream.println("A=M-1");
+        outputFileStream.println("D=M");
+        outputFileStream.println("@THAT");
+        outputFileStream.println("M=D");
+
+        //THIS = *(FRAME - 2)
+        outputFileStream.println("@2");
+        outputFileStream.println("D=A");
+        outputFileStream.println("@R14");
+        outputFileStream.println("A=M-D");
+        outputFileStream.println("D=M");
+        outputFileStream.println("@THIS");
+        outputFileStream.println("M=D");
+
+        //ARG = *(FRAME - 3)
+        outputFileStream.println("@3");
+        outputFileStream.println("D=A");
+        outputFileStream.println("@R14");
+        outputFileStream.println("A=M-D");
+        outputFileStream.println("D=M");
+        outputFileStream.println("@ARG");
+        outputFileStream.println("M=D");
+
+        //LCL = *(FRAME - 4)
+        outputFileStream.println("@4");
+        outputFileStream.println("D=A");
+        outputFileStream.println("@R14");
+        outputFileStream.println("A=M-D");
+        outputFileStream.println("D=M");
+        outputFileStream.println("@LCL");
+        outputFileStream.println("M=D");
+
+        outputFileStream.println("@R15");
+        outputFileStream.println("A=M");
+        outputFileStream.println("0;JMP");
     }
 
     public void writeFunction(String functionName, int numLocals)
     {
+        outputFileStream.println("//function " + functionName + " " + numLocals);
+        this.functionName = functionName;
         outputFileStream.println("(" + functionName + ")");
         for(int i = 0; i < numLocals; i++)
         {
             //Initialize all of the local variables to 0
-            pushResultToRegister("SP",0);
-            pushToStack();
+            outputFileStream.println("@SP");
+            outputFileStream.println("A=M");
+            outputFileStream.println("M=0");
+            incrementSP();
         }
     }
 
@@ -327,6 +489,29 @@ public class CodeWriter
             outputFileStream.println("M=D");
             outputFileStream.println("@SP");
             outputFileStream.println("A=M");
+        }
+    }
+
+    void staticArithmetic(boolean push, int offset)
+    {
+        String splitString = functionName.substring(0,functionName.indexOf("."));
+        if(push)
+        {
+            outputFileStream.println("@" + splitString + ".static" + offset);
+            outputFileStream.println("D=M");
+            outputFileStream.println("@SP");
+            outputFileStream.println("A=M");
+            outputFileStream.println("M=D");
+        }
+        else
+        {
+            popFromStack();
+            outputFileStream.println("@SP");
+            outputFileStream.println("A=M");
+            outputFileStream.println("D=M");
+            outputFileStream.println("@" + splitString + ".static" + offset);
+            outputFileStream.println("M=D");
+            incrementSP();
         }
     }
 }

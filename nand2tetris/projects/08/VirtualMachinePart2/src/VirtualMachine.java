@@ -1,5 +1,4 @@
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -21,9 +20,8 @@ public class VirtualMachine
     private ArrayList<Parser> parsers;
     private ArrayList<String> parserPaths;
     static CodeWriter codeWriter;
-    static String path = "C:\\Users\\bryce\\Desktop\\Nand2Tetris\\nand2tetris\\projects\\08";
-    //static String path = "/Users/brycecallender/desktop/Nand2Tetris/nand2tetris/projects/08";
-    boolean wroteInit = false;
+    private static String path = "/Users/brycecallender/desktop/Nand2Tetris/nand2tetris/projects/08";
+    private boolean wroteInit = false;
 
     VirtualMachine(String fileName)
     {
@@ -64,19 +62,36 @@ public class VirtualMachine
                         fullPathToFile = new StringBuilder(path + '/' + files.getName());
                     }
                 }
+                //Look only for 1 file
                 else
                 {
                     for(File subDirFiles: files.listFiles())
                     {
                         if(subDirFiles.isDirectory())
                         {
-                            for(String subSubDir: subDirFiles.list())
+                            if(subDirFiles.getName().equals(fileName))
                             {
-                                if(subSubDir.equals(fileName))
+                                String path = fullPathToFile + "/" + files.getName() + "/" + subDirFiles.getName();
+                                for(String subSubDir: subDirFiles.list())
                                 {
-                                    String path = fullPathToFile + "/" + files.getName() + "/" + subDirFiles.getName() + "/" + subSubDir;
-                                    parsers.add(new Parser(path));
-                                    parserPaths.add(path);
+                                    if(subSubDir.contains(".vm"))
+                                    {
+                                        String vmPath = path + "/" + subSubDir;
+                                        parsers.add(new Parser(vmPath));
+                                        parserPaths.add(path);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                for(String subSubDir: subDirFiles.list())
+                                {
+                                    if(subSubDir.equals(fileName))
+                                    {
+                                        String path = fullPathToFile + "/" + files.getName() + "/" + subDirFiles.getName() + "/" + subSubDir;
+                                        parsers.add(new Parser(path));
+                                        parserPaths.add(path);
+                                    }
                                 }
                             }
                         }
@@ -96,14 +111,14 @@ public class VirtualMachine
             {
                 codeWriter.setFileName(parserPaths.get(0));
             }
-            catch (FileNotFoundException e)
+            catch (IOException e)
             {
                 e.printStackTrace();
             }
 
             try
             {
-                if(!wroteInit)
+                if(!wroteInit && parserPaths.get(0).contains("FunctionCalls") && !parserPaths.get(0).contains("SimpleFunction"))
                 {
                     codeWriter.writeInit();
                     wroteInit = true;
