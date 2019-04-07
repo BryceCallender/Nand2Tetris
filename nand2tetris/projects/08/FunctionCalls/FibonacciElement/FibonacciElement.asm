@@ -88,7 +88,7 @@ D=M
 AM=M-1
 D=D-M
 @Less0
-D;JNE
+D;JGT
 @SP
 A=M
 M=0
@@ -104,9 +104,11 @@ AM=M+1
 A=A-1
 @SP
 AM=M-1
+@SP
+A=M
 D=M
 @IF_TRUE
-D;JGT
+D;JNE
 //goto IF_FALSE
 @IF_FALSE
 0;JMP

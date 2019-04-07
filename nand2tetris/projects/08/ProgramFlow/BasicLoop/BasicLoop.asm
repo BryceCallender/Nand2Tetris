@@ -158,9 +158,11 @@ A=A-1
 M=D
 @SP
 AM=M-1
+@SP
+A=M
 D=M
 @LOOP_START
-D;JGT
+D;JNE
 //push local 0
 @LCL
 D=M
