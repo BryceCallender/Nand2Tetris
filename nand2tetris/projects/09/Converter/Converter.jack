@@ -2,13 +2,11 @@ class Converter
 {
     field int nothing;
 
-    /** Constructs a new square with a given location and size. */
    constructor Converter new() 
    {
       return this;
    }
 
-   /** Disposes this square. */
    method void dispose() 
    {
       do Memory.deAlloc(this);
