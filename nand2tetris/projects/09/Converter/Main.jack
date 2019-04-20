@@ -1,0 +1,23 @@
+// Inputs some numbers and computes their average
+class Main 
+{
+   function void main() 
+   {
+      var Converter converter;
+      var int returnStatus;
+
+      let converter = Converter.new(); // constructs the converter object
+      do Output.printString("Welcome to the Binary and Hex converter!");
+      do Output.println();
+      do Output.printString("You can convert any number in the range of an int.");
+
+      let returnStatus = converter.promptUser();
+      if(returnStatus)
+      {
+         do Output.println();
+         do Output.printString("Bad input into the program please reload and try again");
+      }
+
+      return;
+   }
+}

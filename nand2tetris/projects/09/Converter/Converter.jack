@@ -1,0 +1,206 @@
+class Converter
+{
+    field int nothing;
+
+    /** Constructs a new square with a given location and size. */
+   constructor Converter new() 
+   {
+      return this;
+   }
+
+   /** Disposes this square. */
+   method void dispose() 
+   {
+      do Memory.deAlloc(this);
+      return;
+   }
+
+   method int promptUser() 
+   {
+       var char key;
+       do Output.println();
+       do Output.printString("Enter B for binary or H for hex conversions: ");
+
+       // waits for the key to be pressed
+       while (key = 0)
+       {
+           let key = Keyboard.keyPressed();
+       }
+
+       do Output.printChar(key);
+
+       if(key = 66)
+       {
+           // waits for the key to be released
+            while (~(key = 0)) 
+            {
+                let key = Keyboard.keyPressed();
+            }
+            do binaryConversion();
+            return 0;
+       }
+       else
+       {
+            if(key = 72)
+            {
+                while (~(key = 0)) 
+                {
+                    let key = Keyboard.keyPressed();
+                }
+                do hexConversion();
+                return 0;
+            }
+       }
+       
+       return -1;
+   }
+
+   method int hexConversion()
+   {
+       var String hex;
+       var int hexMultiplier, hexPosition, length, hexlength, i, number, hexSum;
+
+       do Output.println();
+       do Output.printString("Hexadecimal conversion choosen!");
+       do Output.println();
+
+       let hex = Keyboard.readLine("Enter the hex number to be converted: ");
+       let hexlength = hex.length(); 
+       let length = hexlength - 2; //because itll contain a 0x which is 2 characters
+       let i = 0;
+       let hexMultiplier = 1;
+       let hexPosition = 0;
+       
+       if(checkForHex(hex))
+       {
+           while(i < length)
+           {
+               let number = hex.charAt(hexlength - i - 1); 
+
+               if(isLetter(hex.charAt(hexlength - i - 1)))
+               {
+                   let number = number - 48 - 7;
+               }
+               else
+               {
+                   let number = number - 48;
+               }
+
+               if(hexPosition = 0)
+               {
+                   let hexSum = hexSum + number;
+                   let hexPosition = hexPosition + 1;
+               }
+               else
+               {
+                   let hexSum = hexSum + Math.multiply(hexMultiplier,number);
+               }
+
+               let hexMultiplier = Math.multiply(hexMultiplier,16);
+               let i = i + 1;
+           }
+
+           do Output.printString("The hex evaluates to: ");
+           do Output.printInt(hexSum);
+           return hexSum;
+       }
+       else
+       {
+           do Output.printString("Invalid hex number");
+           return -1;
+       }
+   }
+
+   method int binaryConversion()
+   {
+       var String binary;
+       var int length,i,currentBinaryPower,binaryNum;
+       
+       do Output.println();
+       do Output.printString("Binary conversion choosen!");
+       do Output.println();
+
+       let binary = Keyboard.readLine("Enter the binary number to be converted: ");
+       let length = binary.length();
+       let i = 0;
+       let currentBinaryPower = 1;
+       let binaryNum = 0;
+
+       if(checkForValidBinary(binary))
+       {
+           while(i < length)
+           {
+               if(binary.charAt(length - i - 1) = 49)
+               {
+                   let binaryNum = currentBinaryPower + binaryNum;
+               }
+               let currentBinaryPower = Math.multiply(currentBinaryPower,2);
+               let i = i + 1;
+           }
+           do Output.printString("The binary evaluates to: ");
+           do Output.printInt(binaryNum);
+           return binaryNum;
+       }
+       else
+       {
+           do Output.println();
+           do Output.printString("Invalid binary number");
+           return -1;
+       }
+   }
+
+   method bool checkForHex(String string)
+   {
+       var int index,length;
+       //It starts with 0x
+       if(string.charAt(0) = 48 & string.charAt(1) = 88)
+       {
+           //It has only digits 0..9 and characters A..F
+           let index = 2;
+           let length = string.length();
+           while(index < length)
+           {
+               if((string.charAt(index) < 48 | string.charAt(index) > 57) & (string.charAt(index) < 65 | string.charAt(index) > 70))
+               {
+                   do Output.printString("Hex must begin with 0x exactly");
+                   return false;
+               }
+               let index = index + 1;
+           }
+           return true;
+       }
+       do Output.printString("Hex must begin with 0x");
+       return false;
+   }
+
+   method bool checkForValidBinary(String string)
+   {
+       var int length;
+       var int i;
+
+       let length = string.length();
+       let i = 0;
+
+       while(i < length)
+       {
+           if(string.charAt(i) > 49 | string.charAt(i) < 48)
+           {
+               return false;
+           }
+           let i = i + 1;
+       }
+       return true;
+   }
+
+   method bool isLetter(char number)
+   {
+       if(number > 64)
+       {
+           if(number < 71)
+           {
+               return true;
+           }   
+       }
+       return false;
+   }
+}
