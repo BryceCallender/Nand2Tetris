@@ -9,7 +9,7 @@ class Main
       let converter = Converter.new(); // constructs the converter object
       do Output.printString("Welcome to the Binary and Hex converter!");
       do Output.println();
-      do Output.printString("You can convert any number in the range of an int.");
+      do Output.printString("You can convert numbers in the range of int.(2's complement)");
 
       let returnStatus = converter.promptUser();
       if(returnStatus)
